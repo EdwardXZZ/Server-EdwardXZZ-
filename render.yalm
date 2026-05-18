@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: saki-panel
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: starter
+    envVars:
+      - key: NODE_ENV
+        value: production
