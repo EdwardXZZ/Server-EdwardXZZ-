@@ -5,3 +5,7 @@ services:
     buildCommand: npm install
     startCommand: npm start
     plan: free
+    disk:
+      name: uploads
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
