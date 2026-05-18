@@ -21,7 +21,7 @@
         .upload-zone {
             background: var(--card); border: 2px dashed var(--border);
             border-radius: 16px; padding: 40px; text-align: center;
-            cursor: pointer; transition: 0.3s; margin-bottom: 24px;
+            cursor: pointer; transition: 0.3s; margin-bottom: 24px; position: relative;
         }
         .upload-zone:hover { border-color: var(--acc); background: rgba(108,92,231,0.05); }
         .upload-zone .icon { font-size: 48px; margin-bottom: 8px; }
@@ -29,10 +29,31 @@
         .upload-zone p { color: var(--text2); font-size: 12px; }
         .upload-zone input { display: none; }
         
+        /* Barra de progreso */
+        .progress-container { display: none; margin-top: 16px; }
+        .progress-bar {
+            height: 6px; background: var(--border); border-radius: 3px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; background: linear-gradient(90deg, var(--acc), var(--ok));
+            border-radius: 3px; width: 0%; transition: width 0.3s;
+            animation: pulse 1.5s infinite;
+        }
+        .progress-text { font-size: 12px; color: var(--text2); margin-top: 6px; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+        
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
         .file-card {
             background: var(--card); border: 1px solid var(--border);
             border-radius: 12px; overflow: hidden; transition: 0.2s;
+            animation: fadeIn 0.3s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .file-card:hover { border-color: var(--acc); }
         .file-card img, .file-card video { width: 100%; height: 170px; object-fit: cover; background: #000; }
@@ -61,7 +82,7 @@
         .badge-vid { background: rgba(239,68,68,0.15); color: #fca5a5; }
         .badge-aud { background: rgba(16,185,129,0.15); color: var(--ok); }
         
-        .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; }
+        .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; animation: fadeIn 0.3s ease; }
         .alert-ok { background: rgba(16,185,129,0.1); color: #6ee7b7; }
         
         @media (max-width: 600px) {
@@ -76,61 +97,125 @@
 </div>
 <div class="container">
     <div id="alertContainer"></div>
-    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
+    
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
         <div class="icon">📤</div>
         <h3>Arrastra tu archivo aquí</h3>
         <p>PNG, JPG, MP4, MP3, WAV... | Clic para seleccionar</p>
         <input type="file" id="fileInput" accept="image/*,video/*,audio/*" onchange="subir(this.files[0])">
+        <div class="progress-container" id="progressContainer">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Subiendo... 0%</div>
+        </div>
     </div>
+    
     <div class="grid" id="grid"></div>
 </div>
+
 <script>
 fetch('/api/files').then(r => r.json()).then(render);
 
 function subir(file) {
     if (!file) return;
-    if (file.size > 100*1024*1024) return alert('Máximo 100 MB');
-    const fd = new FormData(); fd.append('file', file);
-    fetch('/api/upload', { method: 'POST', body: fd }).then(r => r.json()).then(() => {
-        showAlert('✅ Subido correctamente');
-        fetch('/api/files').then(r => r.json()).then(render);
-    });
+    if (file.size > 100 * 1024 * 1024) return alert('Máximo 100 MB');
+    
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    const progressContainer = document.getElementById('progressContainer');
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+    
+    progressContainer.style.display = 'block';
+    progressFill.style.width = '0%';
+    progressText.textContent = 'Subiendo... 0%';
+    
+    const xhr = new XMLHttpRequest();
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const percent = Math.round((e.loaded / e.total) * 100);
+            progressFill.style.width = percent + '%';
+            progressText.textContent = 'Subiendo... ' + percent + '%';
+        }
+    };
+    xhr.onload = () => {
+        progressContainer.style.display = 'none';
+        if (xhr.status === 200) {
+            showAlert('✅ Archivo subido correctamente');
+            fetch('/api/files').then(r => r.json()).then(render);
+        }
+    };
+    xhr.open('POST', '/api/upload');
+    xhr.send(formData);
 }
 
 function render(files) {
     const grid = document.getElementById('grid');
-    if (!files.length) { grid.innerHTML = '<div class="empty">📭 Sin archivos</div>'; return; }
+    if (!files.length) {
+        grid.innerHTML = '<div style="text-align:center;padding:40px;color:var(--text2);">📭 Sin archivos aún</div>';
+        return;
+    }
     grid.innerHTML = files.map(f => {
-        const dias = Math.max(0, Math.floor((new Date(f.expira) - new Date())/86400000));
+        const dias = Math.max(0, Math.floor((new Date(f.expira) - new Date()) / 86400000));
         const esVideo = f.type.startsWith('video/');
         const esAudio = f.type.startsWith('audio/');
         const esImagen = f.type.startsWith('image/');
         let preview = '';
         let badge = '';
-        if (esImagen) { preview = `<img src="${f.url}" alt="">`; badge = '<span class="badge badge-img">IMG</span>'; }
-        else if (esVideo) { preview = `<video src="${f.url}" controls></video>`; badge = '<span class="badge badge-vid">VID</span>'; }
-        else if (esAudio) { preview = `<div class="preview">🎵</div><audio src="${f.url}" controls></audio>`; badge = '<span class="badge badge-aud">AUD</span>'; }
-        else { preview = `<div class="preview">📄</div>`; badge = '<span class="badge">FILE</span>'; }
-        return `<div class="file-card">
-            ${preview}
-            <div class="file-info">
-                <div class="name">${f.originalname}</div>
-                <div class="meta"><span>${(f.size/1048576).toFixed(1)} MB</span>${badge}<span>⏳ ${dias}d</span></div>
+        if (esImagen) {
+            preview = `<img src="${f.url}" alt="">`;
+            badge = '<span class="badge badge-img">IMG</span>';
+        } else if (esVideo) {
+            preview = `<video src="${f.url}" controls></video>`;
+            badge = '<span class="badge badge-vid">VID</span>';
+        } else if (esAudio) {
+            preview = `<div class="preview">🎵</div><audio src="${f.url}" controls></audio>`;
+            badge = '<span class="badge badge-aud">AUD</span>';
+        } else {
+            preview = `<div class="preview">📄</div>`;
+            badge = '<span class="badge">FILE</span>';
+        }
+        return `
+            <div class="file-card">
+                ${preview}
+                <div class="file-info">
+                    <div class="name">${f.originalname}</div>
+                    <div class="meta">
+                        <span>${(f.size / 1048576).toFixed(1)} MB</span>
+                        ${badge}
+                        <span>⏳ ${dias}d</span>
+                    </div>
+                </div>
+                <div class="file-actions">
+                    <button class="btn btn-open" onclick="window.open('${window.location.origin}${f.url}')">🔗 Abrir</button>
+                    <button class="btn btn-copy" onclick="copy('${window.location.origin}${f.url}')">📋 Copiar</button>
+                    <button class="btn btn-delete" onclick="del('${f.id}')">🗑</button>
+                </div>
             </div>
-            <div class="file-actions">
-                <button class="btn btn-open" onclick="window.open('${window.location.origin}${f.url}')">🔗 Abrir</button>
-                <button class="btn btn-copy" onclick="copy('${window.location.origin}${f.url}')">📋 Copiar</button>
-                <button class="btn btn-delete" onclick="del('${f.id}')">🗑</button>
-            </div>
-        </div>`;
+        `;
     }).join('');
 }
 
-function copy(url) { navigator.clipboard.writeText(url); showAlert('✅ URL copiada'); }
-function del(id) { if (confirm('¿Eliminar?')) fetch('/api/files/'+id, { method: 'DELETE' }).then(() => fetch('/api/files').then(r => r.json()).then(render)); }
+function copy(url) {
+    navigator.clipboard.writeText(url);
+    showAlert('✅ URL copiada al portapapeles');
+}
+
+function del(id) {
+    if (confirm('¿Eliminar este archivo?')) {
+        fetch('/api/files/' + id, { method: 'DELETE' }).then(() => {
+            fetch('/api/files').then(r => r.json()).then(render);
+        });
+    }
+}
+
 function showAlert(msg) {
     document.getElementById('alertContainer').innerHTML = `<div class="alert alert-ok">${msg}</div>`;
-    setTimeout(() => document.getElementById('alertContainer').innerHTML = '', 2000);
+    setTimeout(() => {
+        document.getElementById('alertContainer').innerHTML = '';
+    }, 2500);
 }
 </script>
 </body>
