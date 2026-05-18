@@ -35,7 +35,9 @@ const upload = multer({
             // Imágenes
             '.png', '.jpg', '.jpeg', '.gif', '.webp', '.bmp', '.svg', '.ico',
             // Videos
-            '.mp4', '.webm', '.mov', '.avi', '.mkv', '.wmv', '.flv', '.3gp'
+            '.mp4', '.webm', '.mov', '.avi', '.mkv', '.wmv', '.flv', '.3gp',
+            // Audio
+            '.mp3', '.wav', '.ogg', '.m4a', '.flac', '.aac', '.wma'
         ];
         const ext = path.extname(file.originalname).toLowerCase();
         cb(null, allowed.includes(ext));
@@ -110,27 +112,22 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ===== LIMPIEZA AUTOMÁTICA CADA 24 HORAS =====
+// ===== LIMPIEZA AUTOMÁTICA =====
 cron.schedule('0 0 * * *', () => {
     console.log('🧹 Limpiando archivos expirados...');
     const files = cargarArchivos();
     const ahora = new Date();
     const activos = files.filter(f => {
-        const expira = new Date(f.expira);
-        if (ahora > expira) {
+        if (ahora > new Date(f.expira)) {
             const filePath = path.join(UPLOADS_DIR, f.filename);
             if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-            console.log(`🗑️ Eliminado: ${f.originalname}`);
             return false;
         }
         return true;
     });
     guardarArchivos(activos);
-    console.log(`✅ Limpieza completada. ${activos.length} archivos activos.`);
 });
 
-// ===== INICIAR =====
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🖼️ Saki Images corriendo en puerto ${PORT}`);
-    console.log(`📁 Límite: 100 MB | Formatos: Imágenes + Videos | Duración: 60 días`);
+    console.log('🖼️ Saki Images en puerto ' + PORT);
 });
