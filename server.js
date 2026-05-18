@@ -282,4 +282,6 @@ io.on('connection', socket => {
 });
 
 // ===== INICIAR =====
-server.listen(PORT, () => console.log(`🚀 Saki Panel en http://localhost:${PORT}`));
+server.listen(PORT, () => {
+    console.log(`🚀 Panel corriendo en puerto ${PORT}`);
+});
