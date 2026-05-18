@@ -3,211 +3,134 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saki Images - Subidor de Archivos</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>Saki Images</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --bg: #0a0e14; --card: #131820; --border: #2a2e3a;
-            --acc: #6c5ce7; --acc2: #a29bfe; --text: #e4e4e7;
-            --text2: #a1a1aa; --ok: #10b981; --err: #ef4444; --warn: #f59e0b;
-            --font: 'Inter', sans-serif;
+            --acc: #6c5ce7; --text: #e4e4e7; --text2: #a1a1aa;
+            --ok: #10b981; --err: #ef4444; --warn: #f59e0b;
         }
         * { margin:0; padding:0; box-sizing:border-box; }
-        body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; }
-
-        .header {
-            background: var(--card); border-bottom: 1px solid var(--border);
-            padding: 16px 24px; text-align: center;
-        }
-        .header h1 { font-size: 24px; color: var(--acc2); }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+        .header { background: var(--card); border-bottom: 1px solid var(--border); padding: 20px; text-align: center; }
+        .header h1 { color: var(--acc); font-size: 24px; }
         .header p { color: var(--text2); font-size: 13px; margin-top: 4px; }
-
-        .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px; }
-
-        /* Zona de subida */
+        .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+        
         .upload-zone {
             background: var(--card); border: 2px dashed var(--border);
-            border-radius: 18px; padding: 48px; text-align: center;
-            transition: all 0.3s; cursor: pointer; margin-bottom: 28px;
+            border-radius: 16px; padding: 40px; text-align: center;
+            cursor: pointer; transition: 0.3s; margin-bottom: 24px;
         }
-        .upload-zone:hover, .upload-zone.dragover {
-            border-color: var(--acc); background: rgba(108,92,231,0.05);
-        }
-        .upload-zone .icon { font-size: 56px; margin-bottom: 12px; }
-        .upload-zone h3 { font-size: 18px; margin-bottom: 6px; }
-        .upload-zone p { color: var(--text2); font-size: 13px; }
+        .upload-zone:hover { border-color: var(--acc); background: rgba(108,92,231,0.05); }
+        .upload-zone .icon { font-size: 48px; margin-bottom: 8px; }
+        .upload-zone h3 { font-size: 16px; margin-bottom: 4px; }
+        .upload-zone p { color: var(--text2); font-size: 12px; }
         .upload-zone input { display: none; }
-
-        /* Grid */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+        
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
         .file-card {
             background: var(--card); border: 1px solid var(--border);
-            border-radius: 14px; overflow: hidden; transition: all 0.2s;
+            border-radius: 12px; overflow: hidden; transition: 0.2s;
         }
-        .file-card:hover { border-color: var(--acc); transform: translateY(-2px); }
-        .file-card img, .file-card video {
-            width: 100%; height: 180px; object-fit: cover; display: block; background: #000;
-        }
-        .file-card .file-icon {
-            width: 100%; height: 180px; display: flex; align-items: center;
-            justify-content: center; font-size: 64px; background: var(--bg);
-        }
-        .file-info { padding: 12px; }
-        .file-info .name { font-size: 12px; color: var(--text2); word-break: break-all; margin-bottom: 6px; }
-        .file-info .meta { font-size: 10px; color: var(--text2); display: flex; justify-content: space-between; }
-        .file-info .expira { color: var(--warn); }
-        .file-actions { display: flex; gap: 6px; padding: 0 12px 12px; }
+        .file-card:hover { border-color: var(--acc); }
+        .file-card img, .file-card video { width: 100%; height: 170px; object-fit: cover; background: #000; }
+        .file-card audio { width: 100%; margin: 10px 0; }
+        .file-card .preview { height: 170px; display: flex; align-items: center; justify-content: center; background: var(--bg); font-size: 56px; }
+        .file-info { padding: 10px 12px; }
+        .file-info .name { font-size: 12px; color: var(--text2); word-break: break-all; }
+        .file-info .meta { font-size: 10px; color: var(--text2); display: flex; justify-content: space-between; margin-top: 4px; }
+        .file-actions { display: flex; gap: 4px; padding: 0 12px 10px; }
+        
         .btn {
-            padding: 7px 14px; border-radius: 7px; border: none; cursor: pointer;
-            font-size: 12px; font-weight: 600; font-family: var(--font); transition: all 0.2s;
+            padding: 7px 12px; border-radius: 6px; border: none; cursor: pointer;
+            font-size: 11px; font-weight: 600; font-family: inherit; transition: 0.2s;
         }
-        .btn-copy { background: var(--acc); color: #fff; flex:1; }
+        .btn-copy { background: var(--acc); color: #fff; flex: 1; }
         .btn-copy:hover { background: #7c6cf0; }
+        .btn-open { background: var(--ok); color: #fff; }
+        .btn-open:hover { opacity: 0.8; }
         .btn-delete { background: rgba(239,68,68,0.1); color: #fca5a5; }
         .btn-delete:hover { background: rgba(239,68,68,0.2); }
-
-        .alert { padding: 12px 16px; border-radius: 10px; font-size: 13px; margin-bottom: 16px; }
-        .alert-ok { background: rgba(16,185,129,0.1); color: #6ee7b7; }
-        .alert-err { background: rgba(239,68,68,0.1); color: #fca5a5; }
-        .empty { text-align: center; padding: 48px; color: var(--text2); }
-
-        .progress { height: 4px; background: var(--border); border-radius: 2px; margin-top: 12px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; background: var(--acc); width: 0%; transition: width 0.3s; }
-
+        
         .badge {
-            display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600;
+            display: inline-block; padding: 2px 8px; border-radius: 8px; font-size: 9px; font-weight: 600;
         }
         .badge-img { background: rgba(59,130,246,0.15); color: #60a5fa; }
         .badge-vid { background: rgba(239,68,68,0.15); color: #fca5a5; }
-
+        .badge-aud { background: rgba(16,185,129,0.15); color: var(--ok); }
+        
+        .alert { padding: 10px 14px; border-radius: 8px; font-size: 12px; margin-bottom: 14px; }
+        .alert-ok { background: rgba(16,185,129,0.1); color: #6ee7b7; }
+        
         @media (max-width: 600px) {
             .grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
         }
     </style>
 </head>
 <body>
-
 <div class="header">
     <h1>🖼️ Saki Images</h1>
-    <p>Sube imágenes y videos • 60 días • Hasta 100 MB</p>
+    <p>Imágenes • Videos • Audio | 100 MB | 60 días</p>
 </div>
-
 <div class="container">
     <div id="alertContainer"></div>
-
-    <!-- Zona de subida -->
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+    <div class="upload-zone" onclick="document.getElementById('fileInput').click()">
         <div class="icon">📤</div>
         <h3>Arrastra tu archivo aquí</h3>
-        <p>o haz clic para seleccionar • PNG, JPG, GIF, WEBP, MP4, WEBM, MOV, AVI, MKV</p>
-        <input type="file" id="fileInput" accept="image/*,video/*" onchange="subirArchivo(this.files[0])">
-        <div class="progress" id="progressBar"><div class="progress-bar" id="progressFill"></div></div>
+        <p>PNG, JPG, MP4, MP3, WAV... | Clic para seleccionar</p>
+        <input type="file" id="fileInput" accept="image/*,video/*,audio/*" onchange="subir(this.files[0])">
     </div>
-
-    <!-- Grid -->
-    <div class="grid" id="filesGrid"></div>
+    <div class="grid" id="grid"></div>
 </div>
-
 <script>
-const uploadZone = document.getElementById('uploadZone');
-const filesGrid = document.getElementById('filesGrid');
+fetch('/api/files').then(r => r.json()).then(render);
 
-// Cargar archivos
-fetch('/api/files').then(r => r.json()).then(renderFiles);
-
-// Drag and drop
-uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('dragover'); });
-uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('dragover'));
-uploadZone.addEventListener('drop', e => {
-    e.preventDefault();
-    uploadZone.classList.remove('dragover');
-    if (e.dataTransfer.files[0]) subirArchivo(e.dataTransfer.files[0]);
-});
-
-function subirArchivo(file) {
+function subir(file) {
     if (!file) return;
-    if (file.size > 100 * 1024 * 1024) return alert('Máximo 100 MB');
-
-    const formData = new FormData();
-    formData.append('file', file);
-
-    document.getElementById('progressBar').style.display = 'block';
-    document.getElementById('progressFill').style.width = '0%';
-
-    const xhr = new XMLHttpRequest();
-    xhr.upload.onprogress = e => {
-        if (e.lengthComputable) {
-            document.getElementById('progressFill').style.width = (e.loaded / e.total * 100) + '%';
-        }
-    };
-    xhr.onload = () => {
-        document.getElementById('progressBar').style.display = 'none';
-        if (xhr.status === 200) {
-            showAlert('✅ Archivo subido correctamente', 'ok');
-            fetch('/api/files').then(r => r.json()).then(renderFiles);
-        } else {
-            showAlert('❌ Error al subir', 'err');
-        }
-    };
-    xhr.open('POST', '/api/upload');
-    xhr.send(formData);
-}
-
-function renderFiles(files) {
-    if (!files.length) {
-        filesGrid.innerHTML = '<div class="empty">📭 No hay archivos aún</div>';
-        return;
-    }
-    filesGrid.innerHTML = files.map(f => {
-        const diasRestantes = Math.max(0, Math.floor((new Date(f.expira) - new Date()) / 86400000));
-        const esVideo = f.type.startsWith('video/');
-        const esImagen = f.type.startsWith('image/');
-        let preview = '';
-        if (esImagen) preview = `<img src="${f.url}" alt="${f.originalname}" loading="lazy">`;
-        else if (esVideo) preview = `<video src="${f.url}" controls preload="metadata"></video>`;
-        else preview = `<div class="file-icon">📄</div>`;
-
-        return `
-            <div class="file-card">
-                ${preview}
-                <div class="file-info">
-                    <div class="name">${f.originalname}</div>
-                    <div class="meta">
-                        <span>${formatSize(f.size)}</span>
-                        <span class="badge ${esVideo ? 'badge-vid' : 'badge-img'}">${esVideo ? '🎬 Video' : '🖼️ Imagen'}</span>
-                        <span class="expira">⏳ ${diasRestantes}d</span>
-                    </div>
-                </div>
-                <div class="file-actions">
-                    <button class="btn btn-copy" onclick="copiarUrl('${window.location.origin}${f.url}')">📋 Copiar URL</button>
-                    <button class="btn btn-delete" onclick="eliminar('${f.id}')">🗑</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function copiarUrl(url) {
-    navigator.clipboard.writeText(url).then(() => showAlert('✅ URL copiada al portapapeles', 'ok'));
-}
-
-function eliminar(id) {
-    if (!confirm('¿Eliminar este archivo?')) return;
-    fetch('/api/files/' + id, { method: 'DELETE' }).then(() => {
-        showAlert('🗑️ Archivo eliminado', 'ok');
-        fetch('/api/files').then(r => r.json()).then(renderFiles);
+    if (file.size > 100*1024*1024) return alert('Máximo 100 MB');
+    const fd = new FormData(); fd.append('file', file);
+    fetch('/api/upload', { method: 'POST', body: fd }).then(r => r.json()).then(() => {
+        showAlert('✅ Subido correctamente');
+        fetch('/api/files').then(r => r.json()).then(render);
     });
 }
 
-function showAlert(msg, type) {
-    document.getElementById('alertContainer').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
-    setTimeout(() => document.getElementById('alertContainer').innerHTML = '', 3000);
+function render(files) {
+    const grid = document.getElementById('grid');
+    if (!files.length) { grid.innerHTML = '<div class="empty">📭 Sin archivos</div>'; return; }
+    grid.innerHTML = files.map(f => {
+        const dias = Math.max(0, Math.floor((new Date(f.expira) - new Date())/86400000));
+        const esVideo = f.type.startsWith('video/');
+        const esAudio = f.type.startsWith('audio/');
+        const esImagen = f.type.startsWith('image/');
+        let preview = '';
+        let badge = '';
+        if (esImagen) { preview = `<img src="${f.url}" alt="">`; badge = '<span class="badge badge-img">IMG</span>'; }
+        else if (esVideo) { preview = `<video src="${f.url}" controls></video>`; badge = '<span class="badge badge-vid">VID</span>'; }
+        else if (esAudio) { preview = `<div class="preview">🎵</div><audio src="${f.url}" controls></audio>`; badge = '<span class="badge badge-aud">AUD</span>'; }
+        else { preview = `<div class="preview">📄</div>`; badge = '<span class="badge">FILE</span>'; }
+        return `<div class="file-card">
+            ${preview}
+            <div class="file-info">
+                <div class="name">${f.originalname}</div>
+                <div class="meta"><span>${(f.size/1048576).toFixed(1)} MB</span>${badge}<span>⏳ ${dias}d</span></div>
+            </div>
+            <div class="file-actions">
+                <button class="btn btn-open" onclick="window.open('${window.location.origin}${f.url}')">🔗 Abrir</button>
+                <button class="btn btn-copy" onclick="copy('${window.location.origin}${f.url}')">📋 Copiar</button>
+                <button class="btn btn-delete" onclick="del('${f.id}')">🗑</button>
+            </div>
+        </div>`;
+    }).join('');
 }
 
-function formatSize(bytes) {
-    if (bytes > 1073741824) return (bytes / 1073741824).toFixed(1) + ' GB';
-    if (bytes > 1048576) return (bytes / 1048576).toFixed(1) + ' MB';
-    return (bytes / 1024).toFixed(0) + ' KB';
+function copy(url) { navigator.clipboard.writeText(url); showAlert('✅ URL copiada'); }
+function del(id) { if (confirm('¿Eliminar?')) fetch('/api/files/'+id, { method: 'DELETE' }).then(() => fetch('/api/files').then(r => r.json()).then(render)); }
+function showAlert(msg) {
+    document.getElementById('alertContainer').innerHTML = `<div class="alert alert-ok">${msg}</div>`;
+    setTimeout(() => document.getElementById('alertContainer').innerHTML = '', 2000);
 }
 </script>
 </body>
