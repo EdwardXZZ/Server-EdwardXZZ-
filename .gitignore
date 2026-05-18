@@ -1,0 +1,8 @@
+node_modules/
+.env
+bots/*
+!bots/.gitkeep
+data/bots.json
+*.log
+uploads/
+temp/
