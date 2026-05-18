@@ -1,4 +1,4 @@
-markdown
+
 <p align="center">
   <img src="https://server-edward.onrender.com/uploads/3fcde57f.jpeg" width="180" style="border-radius: 50%; border: 3px solid #6c5ce7;">
 </p>
